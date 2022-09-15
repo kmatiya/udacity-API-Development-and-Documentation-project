@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import $ from "jquery";
 import "../stylesheets/QuizView.css";
+import constants from "../constants";
 
 const questionsPerPlay = 5;
 
