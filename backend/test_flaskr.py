@@ -89,6 +89,7 @@ class TriviaTestCase(unittest.TestCase):
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data["success"], True)
+        self.assertTrue(data['question_id'])
         self.assertEqual(data['question'],question)
         self.assertEqual(data['answer'],answer)
         self.assertEqual(data['difficulty'],difficulty)
