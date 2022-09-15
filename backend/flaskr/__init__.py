@@ -2,7 +2,7 @@ import os
 from unicodedata import category
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from flask_cors import CORS
+from flask_cors import CORS,cross_origin
 import random
 
 from models import setup_db, Question, Category
@@ -20,6 +20,7 @@ def paginate_questions(request, selection):
     paginated_questions = questions[start:end]
     return paginated_questions
 
+
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
@@ -28,7 +29,7 @@ def create_app(test_config=None):
     """
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
     """
-    CORS(app)
+    cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
     """
     @TODO: Use the after_request decorator to set Access-Control-Allow
@@ -46,6 +47,7 @@ def create_app(test_config=None):
     for all available categories.
     """
     @app.route(API_URL_PREFIX+VERSION+'/categories')
+    @cross_origin()
     def get_categories():
         categories = Category.query.all()
 
@@ -70,6 +72,7 @@ def create_app(test_config=None):
     Clicking on the page numbers should update the questions.
     """
     @app.route(API_URL_PREFIX+VERSION+'/questions')
+    @cross_origin()
     def get_questions():
         selection = Question.query.order_by(Question.id).all()
         # questions not available, do not proceed
@@ -94,6 +97,7 @@ def create_app(test_config=None):
     TEST: When you click the trash icon next to a question, the question will be removed.
     This removal will persist in the database and when you refresh the page.
     """
+    @cross_origin()
     @app.route(API_URL_PREFIX+VERSION+"/questions/<question_id>", methods=['DELETE'])
     def delete_question(question_id):
         try:
