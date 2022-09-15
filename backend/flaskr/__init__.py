@@ -1,4 +1,5 @@
 import os
+from unicodedata import category
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
@@ -53,7 +54,7 @@ def create_app(test_config=None):
 
         return jsonify({
             'success': True,
-            'categories': [category.format() for category in categories],
+            'categories': {category.id: category.type for category in categories},
         })
 
     """
@@ -81,9 +82,9 @@ def create_app(test_config=None):
         return jsonify({
             'success': True,
             'questions': paginated_questions,
-            'total_questions': len(selection),
-            'categories': [category.format() for category in categories],
-            'current_category': None
+            'totalQuestions': len(selection),
+            'categories': {category.id: category.type for category in categories},
+            'currentCategory': None
         })
     
     """
@@ -153,19 +154,16 @@ def create_app(test_config=None):
     def search_questions():
         try:
             request_body = request.get_json()
-            search_query = request_body.get('search_query', None)
+            search_query = request_body.get('searchTerm', None)
         
             if search_query:
                 search_results = Question.query.filter(
                     Question.question.ilike(f'%{search_query}%')).all()
 
-                if(len(search_results == 0)):
-                    abort(404)
-
                 return jsonify({
                     'success': True,
                     'questions': [each_question.format() for each_question in search_results],
-                    'total_questions': len(search_results)
+                    'totalQuestions': len(search_results)
                 }
                 )
         except:
@@ -185,13 +183,13 @@ def create_app(test_config=None):
             questions = Question.query.filter(
                 Question.category == str(category_id)).all()
 
-            if(len(questions == 0)):
-                abort(404)
+            category = Category.query.get(category_id)
 
             return jsonify({
                 'success': True,
                 'questions': [question.format() for question in questions],
-                'total_questions': len(questions),
+                'totalQuestions': len(questions),
+                'CurrentCategory': category.type
             })
         except:
             abort(422)
