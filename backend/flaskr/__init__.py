@@ -10,6 +10,15 @@ QUESTIONS_PER_PAGE = 10
 API_URL_PREFIX='/api'
 VERSION='/v1.0'
 
+# function to paginate api requests
+def paginate_questions(request, selection):
+    page = request.args.get('page', 1, type=int)
+    start = (page - 1) * QUESTIONS_PER_PAGE
+    end = start + QUESTIONS_PER_PAGE
+    questions = [question.format() for question in selection]
+    paginated_questions = questions[start:end]
+    return paginated_questions
+
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
@@ -48,7 +57,7 @@ def create_app(test_config=None):
 
         return jsonify({
             'success': True,
-            'categories': {category.id: category.type for category in categories},
+            'categories': [category.format() for category in categories],
             'count': len(categories)
         })
 
@@ -64,7 +73,24 @@ def create_app(test_config=None):
     ten questions per page and pagination at the bottom of the screen for three pages.
     Clicking on the page numbers should update the questions.
     """
+    @app.route(API_URL_PREFIX+VERSION+'/questions')
+    def get_questions():
+        selection = Question.query.order_by(Question.id).all()
+        # questions not available, do not proceed
+        if len(selection) == 0:
+            abort(404)
 
+        paginated_questions = paginate_questions(request, selection)
+        categories = Category.query.order_by(Category.type).all()
+
+        return jsonify({
+            'success': True,
+            'questions': paginated_questions,
+            'total_questions': len(selection),
+            'categories': [category.format() for category in categories],
+            'current_category': None
+        })
+    
     """
     @TODO:
     Create an endpoint to DELETE question using a question ID.
