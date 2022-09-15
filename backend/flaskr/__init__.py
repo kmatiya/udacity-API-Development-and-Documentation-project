@@ -49,10 +49,7 @@ def create_app(test_config=None):
         categories = Category.query.all()
 
         if len(categories) == 0:
-            return jsonify({
-                'success': True,
-                'categories': [],
-        }) 
+            abort(404)
 
         return jsonify({
             'success': True,
@@ -106,7 +103,7 @@ def create_app(test_config=None):
                 'deleted_question_id': question_id
             })
         except:
-            abort(422,'Error deleting question')    
+            abort(422)    
     
     """
     @TODO:
@@ -124,7 +121,7 @@ def create_app(test_config=None):
 
         if not ('question' in request_body and 'answer' in request_body 
         and 'difficulty' in request_body and 'category' in request_body):
-            abort(422)
+            abort(400)
 
         try:
             new_question = Question(question=request_body.get('question'), answer=request_body.get('answer'),
@@ -162,6 +159,9 @@ def create_app(test_config=None):
                 search_results = Question.query.filter(
                     Question.question.ilike(f'%{search_query}%')).all()
 
+                if(len(search_results == 0)):
+                    abort(404)
+
                 return jsonify({
                     'success': True,
                     'questions': [each_question.format() for each_question in search_results],
@@ -169,7 +169,7 @@ def create_app(test_config=None):
                 }
                 )
         except:
-            abort(500)
+            abort(422)
     """
     @TODO:
     Create a GET endpoint to get questions based on category.
@@ -184,6 +184,9 @@ def create_app(test_config=None):
         try:
             questions = Question.query.filter(
                 Question.category == str(category_id)).all()
+
+            if(len(questions == 0)):
+                abort(404)
 
             return jsonify({
                 'success': True,
@@ -209,6 +212,30 @@ def create_app(test_config=None):
     Create error handlers for all expected errors
     including 404 and 422.
     """
+    @app.errorhandler(404)
+    def not_found(error):
+        return jsonify({
+            "success": False,
+            "error": 404,
+            "message": "resource/requested data cannot be found"
+        }), 404
+
+    @app.errorhandler(422)
+    def unprocessable(error):
+        return jsonify({
+            "success": False,
+            "error": 422,
+            "message": "unprocessable: Your request cannot be processed. Please try again later or contact user support."
+        }), 422
+
+    @app.errorhandler(400)
+    def bad_request(error):
+        return jsonify({
+            "success": False,
+            "error": 400,
+            "message": "bad request: Please check your request details. Please try again later or contact user support."
+        }), 400
+
 
     return app
 
