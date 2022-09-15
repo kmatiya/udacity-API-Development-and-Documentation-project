@@ -51,14 +51,12 @@ def create_app(test_config=None):
         if len(categories) == 0:
             return jsonify({
                 'success': True,
-                'categories': 0,
-                'count': 0
+                'categories': [],
         }) 
 
         return jsonify({
             'success': True,
             'categories': [category.format() for category in categories],
-            'count': len(categories)
         })
 
     """
@@ -108,7 +106,7 @@ def create_app(test_config=None):
                 'deleted_question_id': question_id
             })
         except:
-            abort(422)    
+            abort(422,'Error deleting question')    
     
     """
     @TODO:
