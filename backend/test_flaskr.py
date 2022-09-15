@@ -71,7 +71,29 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(int(data['deleted_question_id']), deleted_question_id)
         self.assertEqual(question, None)
 
+    def test_add_question(self):
+        question = 'This is a new question'
+        answer = 'This is a new answer'
+        difficulty = 1
+        category = 1
+        new_question = {
+            'question': question,
+            'answer': answer,
+            'difficulty': difficulty,
+            'category': category
+        }
+        expected_total_questions= len(Question.query.all())+1
+        res = self.client().post(self.api_prefix+self.version+'/questions',json=new_question)
+        data = json.loads(res.data)
+        total_questions_after_add = len(Question.query.all())
 
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data["success"], True)
+        self.assertEqual(data['question'],question)
+        self.assertEqual(data['answer'],answer)
+        self.assertEqual(data['difficulty'],difficulty)
+        self.assertEqual(data['category'],1)
+        self.assertEqual(total_questions_after_add, expected_total_questions)
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
