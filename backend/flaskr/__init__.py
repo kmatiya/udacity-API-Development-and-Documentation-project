@@ -8,8 +8,7 @@ import random
 from models import setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
-API_URL_PREFIX='/api'
-VERSION='/v1.0'
+
 
 # function to paginate api requests
 def paginate_questions(request, selection):
@@ -27,13 +26,13 @@ def create_app(test_config=None):
     setup_db(app)
 
     """
-    @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
+    @DONE: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
     """
     #cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
     CORS(app)
 
     """
-    @TODO: Use the after_request decorator to set Access-Control-Allow
+    @DONE: Use the after_request decorator to set Access-Control-Allow
     """
     @app.after_request
     def after_request(response):
@@ -46,11 +45,11 @@ def create_app(test_config=None):
 
 
     """
-    @TODO:
+    @DONE:
     Create an endpoint to handle GET requests
     for all available categories.
     """
-    @app.route(API_URL_PREFIX+VERSION+'/categories')
+    @app.route('/categories')
     @cross_origin()
     def get_categories():
         categories = Category.query.all()
@@ -64,7 +63,7 @@ def create_app(test_config=None):
         })
 
     """
-    @TODO:
+    @DONE:
     Create an endpoint to handle GET requests for questions,
     including pagination (every 10 questions).
     This endpoint should return a list of questions,
@@ -75,7 +74,7 @@ def create_app(test_config=None):
     ten questions per page and pagination at the bottom of the screen for three pages.
     Clicking on the page numbers should update the questions.
     """
-    @app.route(API_URL_PREFIX+VERSION+'/questions')
+    @app.route('/questions')
     @cross_origin()
     def get_questions():
         selection = Question.query.order_by(Question.id).all()
@@ -95,14 +94,14 @@ def create_app(test_config=None):
         })
     
     """
-    @TODO:
+    @DONE:
     Create an endpoint to DELETE question using a question ID.
 
     TEST: When you click the trash icon next to a question, the question will be removed.
     This removal will persist in the database and when you refresh the page.
     """
     @cross_origin()
-    @app.route(API_URL_PREFIX+VERSION+"/questions/<question_id>", methods=['DELETE'])
+    @app.route("/questions/<question_id>", methods=['DELETE'])
     def delete_question(question_id):
         try:
             question = Question.query.get(question_id)
@@ -115,7 +114,7 @@ def create_app(test_config=None):
             abort(422)    
     
     """
-    @TODO:
+    @DONE:
     Create an endpoint to POST a new question,
     which will require the question and answer text,
     category, and difficulty score.
@@ -124,7 +123,7 @@ def create_app(test_config=None):
     the form will clear and the question will appear at the end of the last page
     of the questions list in the "List" tab.
     """
-    @app.route(API_URL_PREFIX+VERSION+"/questions", methods=['POST'])
+    @app.route("/questions", methods=['POST'])
     @cross_origin()
     def add_question():
         request_body = request.get_json()
@@ -150,7 +149,7 @@ def create_app(test_config=None):
         except:
             abort(422)
     """
-    @TODO:
+    @DONE:
     Create a POST endpoint to get questions based on a search term.
     It should return any questions for whom the search term
     is a substring of the question.
@@ -159,7 +158,7 @@ def create_app(test_config=None):
     only question that include that string within their question.
     Try using the word "title" to start.
     """
-    @app.route(API_URL_PREFIX+VERSION+'/search', methods=['POST'])
+    @app.route('/search', methods=['POST'])
     @cross_origin()
     def search_questions():
         try:
@@ -181,14 +180,14 @@ def create_app(test_config=None):
         except:
             abort(422)
     """
-    @TODO:
+    @DONE:
     Create a GET endpoint to get questions based on category.
 
     TEST: In the "List" tab / main screen, clicking on one of the
     categories in the left column will cause only questions of that
     category to be shown.
     """
-    @app.route(API_URL_PREFIX+VERSION+'/categories/<int:category_id>/questions', methods=['GET'])
+    @app.route('/categories/<int:category_id>/questions', methods=['GET'])
     @cross_origin()
     def get_questions_by_category(category_id):
 
@@ -207,7 +206,7 @@ def create_app(test_config=None):
         except:
             abort(422)
     """
-    @TODO:
+    @DONE:
     Create a POST endpoint to get questions to play the quiz.
     This endpoint should take category and previous question parameters
     and return a random questions within the given category,
@@ -217,7 +216,7 @@ def create_app(test_config=None):
     one question at a time is displayed, the user is allowed to answer
     and shown whether they were correct or not.
     """
-    @app.route(API_URL_PREFIX+VERSION+'/quizzes', methods=['POST'])
+    @app.route('/quizzes', methods=['POST'])
     @cross_origin()
     def play_quiz():
 
@@ -245,7 +244,7 @@ def create_app(test_config=None):
         except:
             abort(422)
     """
-    @TODO:
+    @DONE:
     Create error handlers for all expected errors
     including 404 and 422.
     """

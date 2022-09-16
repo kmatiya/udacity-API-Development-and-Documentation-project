@@ -73,7 +73,7 @@ You will need to provide detailed documentation of your API endpoints including 
 
 ### API Documentation
 
-`GET '/api/v1.0/categories'`
+`GET '/categories'`
 
 - Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
 - Request Arguments: None
@@ -90,7 +90,7 @@ You will need to provide detailed documentation of your API endpoints including 
 }
 ```
 
-GET `/api/v1.0/questions?page=<page_number>`
+GET `/questions?page=<page_number>`
 
 - Fetches a paginated dictionary of questions of all available categories
 - Request parameters (optional): page:int
@@ -127,7 +127,7 @@ GET `/api/v1.0/questions?page=<page_number>`
 }
 ```
 
-DELETE `/api/v1.0//questions/<question_id>`
+DELETE `/questions/<question_id>`
 
 - Removes an existing question from the database if question id is valid
 - Request arguments: question_id:int
@@ -140,7 +140,7 @@ DELETE `/api/v1.0//questions/<question_id>`
 }
 ```
 
-POST `/api/v1.0/questions`
+POST `/questions`
 
 - Add a new question in the database
 - Request body
@@ -167,7 +167,7 @@ POST `/api/v1.0/questions`
 }
 ```
 
-POST `/api/v1.0/search`
+POST `/search`
 
 - Sends a post request in order to search for a specific question by search term
 - Request body:
@@ -194,7 +194,7 @@ POST `/api/v1.0/search`
 }
 ```
 
-GET `/api/v1.0/categories/<int:category_id>/questions`
+GET `/categories/<int:category_id>/questions`
 
 - Fetches a dictionary of questions for the specified category
 - Request argument: category_id:int
@@ -224,7 +224,7 @@ GET `/api/v1.0/categories/<int:category_id>/questions`
 }
 ```
 
-POST `/api/v1.0/quizzes`
+POST `/quizzes`
 
 - Sends a post request in order to get the next question
 - Request body:
