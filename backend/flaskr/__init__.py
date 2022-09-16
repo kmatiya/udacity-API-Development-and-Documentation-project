@@ -30,6 +30,7 @@ def create_app(test_config=None):
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
     """
     #cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+    CORS(app)
 
     """
     @TODO: Use the after_request decorator to set Access-Control-Allow
@@ -78,12 +79,12 @@ def create_app(test_config=None):
     @cross_origin()
     def get_questions():
         selection = Question.query.order_by(Question.id).all()
-        # questions not available, do not proceed
-        if len(selection) == 0:
-            abort(404)
-
         paginated_questions = paginate_questions(request, selection)
         categories = Category.query.order_by(Category.type).all()
+
+        # questions not available, do not proceed
+        if len(paginated_questions) == 0 or None:
+            abort(404)
 
         return jsonify({
             'success': True,
@@ -163,16 +164,18 @@ def create_app(test_config=None):
     def search_questions():
         try:
             request_body = request.get_json()
-            search_query = request_body.get('searchTerm', None)
+            search_query = request_body.get('searchTerm', '')
+
+            if search_query == '':
+                abort(422)
         
-            if search_query:
-                search_results = Question.query.filter(
+            search_results = Question.query.filter(
                     Question.question.ilike(f'%{search_query}%')).all()
 
-                return jsonify({
-                    'success': True,
-                    'questions': [each_question.format() for each_question in search_results],
-                    'totalQuestions': len(search_results)
+            return jsonify({
+                'success': True,
+                'questions': [each_question.format() for each_question in search_results],
+                'totalQuestions': len(search_results)
                 }
                 )
         except:
