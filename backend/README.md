@@ -71,7 +71,7 @@ One note before you delve into your tasks: for each endpoint, you are expected t
 
 You will need to provide detailed documentation of your API endpoints including the URL, request parameters, and the response body. Use the example below as a reference.
 
-### Documentation Example
+### API Documentation
 
 `GET '/api/v1.0/categories'`
 
@@ -87,6 +87,167 @@ You will need to provide detailed documentation of your API endpoints including 
   "4": "History",
   "5": "Entertainment",
   "6": "Sports"
+}
+```
+
+GET `/api/v1.0/questions?page=<page_number>`
+
+- Fetches a paginated dictionary of questions of all available categories
+- Request parameters (optional): page:int
+- Example response:
+
+```{
+ "categories": {
+   "1": "Science",
+   "2": "Art",
+   "3": "Geography",
+   "4": "History",
+   "5": "Entertainment",
+   "6": "Sports"
+ },
+ "current_category": null,
+ "questions": [
+   {
+     "answer": "Maya Angelou",
+     "category": 4,
+     "difficulty": 2,
+     "id": 5,
+     "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
+   },
+   {
+     "answer": "Escher",
+     "category": 2,
+     "difficulty": 1,
+     "id": 16,
+     "question": "Which Dutch graphic artist\u2013initials M C was a creator of optical illusions?"
+   }
+ ],
+ "success": true,
+ "total_questions": 2
+}
+```
+
+DELETE `/api/v1.0//questions/<question_id>`
+
+- Removes an existing question from the database if question id is valid
+- Request arguments: question_id:int
+- Example response:
+
+```
+{
+  "deleted_question_id": "3",
+  "success": true
+}
+```
+
+POST `/api/v1.0/questions`
+
+- Add a new question in the database
+- Request body
+
+```
+{
+    "question": "Test question",
+    "answer": "Test answer",
+    "difficulty": 1,
+    "category": "1"
+}
+```
+
+- Example response:
+
+```
+{
+    "answer": "Test answer",
+    "category": 1,
+    "difficulty": 1,
+    "question": "Test question",
+    "question_id": 24,
+    "success": true
+}
+```
+
+POST `/api/v1.0/search`
+
+- Sends a post request in order to search for a specific question by search term
+- Request body:
+
+```
+  { "searchTerm": "africa"}
+```
+
+- Example response:
+
+```
+{
+    "questions": [
+        {
+            "answer": "Lake Victoria",
+            "category": 3,
+            "difficulty": 2,
+            "id": 13,
+            "question": "What is the largest lake in Africa?"
+        }
+    ],
+    "success": true,
+    "totalQuestions": 1
+}
+```
+
+GET `/api/v1.0/categories/<int:category_id>/questions`
+
+- Fetches a dictionary of questions for the specified category
+- Request argument: category_id:int
+- Example response:
+
+```
+{
+    "CurrentCategory": "Sports",
+    "questions": [
+        {
+            "answer": "Brazil",
+            "category": 6,
+            "difficulty": 3,
+            "id": 10,
+            "question": "Which is the only team to play in every soccer World Cup tournament?"
+        },
+        {
+            "answer": "Uruguay",
+            "category": 6,
+            "difficulty": 4,
+            "id": 11,
+            "question": "Which country won the first ever soccer World Cup in 1930?"
+        }
+    ],
+    "success": true,
+    "totalQuestions": 2
+}
+```
+
+POST `/api/v1.0/quizzes`
+
+- Sends a post request in order to get the next question
+- Request body:
+
+```
+{
+  "quiz_category": {"type": "Sports", "id": 6},
+  "previous_questions": []
+}
+```
+
+- Example response:
+
+```
+{
+  "question": {
+    "answer": "Uruguay",
+    "category": 6,
+    "difficulty": 4,
+    "id": 11,
+    "question": "Which country won the first ever soccer World Cup in 1930?"
+    },
+  "success": true
 }
 ```
 

@@ -214,7 +214,7 @@ def create_app(test_config=None):
     one question at a time is displayed, the user is allowed to answer
     and shown whether they were correct or not.
     """
-    @app.route('/quizzes', methods=['POST'])
+    @app.route(API_URL_PREFIX+VERSION+'/quizzes', methods=['POST'])
     @cross_origin()
     def play_quiz():
 
