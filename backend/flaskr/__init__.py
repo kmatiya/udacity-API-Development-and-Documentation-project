@@ -29,15 +29,18 @@ def create_app(test_config=None):
     """
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
     """
-    cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+    #cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
     """
     @TODO: Use the after_request decorator to set Access-Control-Allow
     """
     @app.after_request
     def after_request(response):
-        response.headers.add('Access-Control-Allow-Headers','Content-Type,Authorization,true')
-        response.headers.add('Access-Control-Allow-Methods','GET,PATCH,POST,DELETE,OPTIONS')
+        response.headers.add('Access-Control-Allow-Headers',
+                             'Content-Type,Authorization,true')
+        response.headers.add('Access-Control-Allow-Methods',
+                             'GET,PATCH,POST,DELETE,OPTIONS')
+        
         return response
 
 
@@ -121,6 +124,7 @@ def create_app(test_config=None):
     of the questions list in the "List" tab.
     """
     @app.route(API_URL_PREFIX+VERSION+"/questions", methods=['POST'])
+    @cross_origin()
     def add_question():
         request_body = request.get_json()
 
@@ -155,6 +159,7 @@ def create_app(test_config=None):
     Try using the word "title" to start.
     """
     @app.route(API_URL_PREFIX+VERSION+'/search', methods=['POST'])
+    @cross_origin()
     def search_questions():
         try:
             request_body = request.get_json()
@@ -181,6 +186,7 @@ def create_app(test_config=None):
     category to be shown.
     """
     @app.route(API_URL_PREFIX+VERSION+'/categories/<int:category_id>/questions', methods=['GET'])
+    @cross_origin()
     def get_questions_by_category(category_id):
 
         try:
@@ -208,7 +214,33 @@ def create_app(test_config=None):
     one question at a time is displayed, the user is allowed to answer
     and shown whether they were correct or not.
     """
+    @app.route('/quizzes', methods=['POST'])
+    @cross_origin()
+    def play_quiz():
 
+        try:
+
+            request_body = request.get_json()
+
+            # Validate request body has quizz category and previous questions
+            if not ('quiz_category' in request_body and 'previous_questions' in request_body):
+                abort(422)
+
+            category = request_body.get('quiz_category')
+            previous_questions = request_body.get('previous_questions')
+
+            new_questions_in_db = Question.query.filter_by(
+                    category=category['id']).filter(Question.id.notin_((previous_questions))).all()
+
+            new_question = new_questions_in_db[random.randrange(
+                0, len(new_questions_in_db))].format() if len(new_questions_in_db) > 0 else None
+
+            return jsonify({
+                'success': True,
+                'question': new_question
+            })
+        except:
+            abort(422)
     """
     @TODO:
     Create error handlers for all expected errors
