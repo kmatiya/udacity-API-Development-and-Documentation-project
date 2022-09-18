@@ -19,6 +19,30 @@ def paginate_questions(request, selection):
     paginated_questions = questions[start:end]
     return paginated_questions
 
+def return_categories_dictionary(categories):
+    '''
+        Frontend app expects categories in the format {"1": "Science"}.
+        This function converts the json array to return categories in the expected format
+    '''
+    category_dictionary = {}
+    for category in categories:
+        category_dictionary[category.id] = category.type
+    return category_dictionary
+
+def get_success_response_template():
+    return {
+        'success': True
+    }
+
+def get_categories_by_type():
+    '''
+        getting categories is referred more than once, hence best to have the calls in a function.
+    '''
+    return Category.query.all()
+
+def generate_random_index(min,max):
+    return random.randrange(min, max)
+
 
 def create_app(test_config=None):
     # create and configure the app
@@ -52,15 +76,14 @@ def create_app(test_config=None):
     @app.route('/categories')
     @cross_origin()
     def get_categories():
-        categories = Category.query.all()
+        categories = get_categories_by_type()
 
         if len(categories) == 0:
             abort(404)
 
-        return jsonify({
-            'success': True,
-            'categories': {category.id: category.type for category in categories},
-        })
+        response = get_success_response_template()
+        response['categories'] = return_categories_dictionary(categories)
+        return jsonify(response)
 
     """
     @DONE:
@@ -77,21 +100,19 @@ def create_app(test_config=None):
     @app.route('/questions')
     @cross_origin()
     def get_questions():
-        selection = Question.query.order_by(Question.id).all()
+        selection = Question.query.order_by(Question.category).all()
+        number_of_questions_in_db = len(selection)
         paginated_questions = paginate_questions(request, selection)
-        categories = Category.query.order_by(Category.type).all()
+        categories = get_categories_by_type()
 
-        # questions not available, do not proceed
-        if len(paginated_questions) == 0 or None:
+        if(len(paginated_questions) == 0):
             abort(404)
 
-        return jsonify({
-            'success': True,
-            'questions': paginated_questions,
-            'totalQuestions': len(selection),
-            'categories': {category.id: category.type for category in categories},
-            'currentCategory': None
-        })
+        response = get_success_response_template()
+        response['questions'] = paginated_questions
+        response['totalQuestions'] = number_of_questions_in_db
+        response['categories'] = return_categories_dictionary(categories)
+        return jsonify(response)
     
     """
     @DONE:
@@ -106,10 +127,9 @@ def create_app(test_config=None):
         try:
             question = Question.query.get(question_id)
             question.delete()
-            return jsonify({
-                'success': True,
-                'deleted_question_id': question_id
-            })
+            response = get_success_response_template()
+            response['deleted_question_id'] = question_id
+            return jsonify(response)
         except:
             abort(422)    
     
@@ -136,15 +156,15 @@ def create_app(test_config=None):
             new_question = Question(question=request_body.get('question'), answer=request_body.get('answer'),
                                 difficulty=request_body.get('difficulty'), category=request_body.get('category'))
             new_question.insert()
+            
+            response = get_success_response_template()
+            response['question_id'] = new_question.id
+            response['question'] = new_question.question
+            response['answer'] = new_question.answer
+            response['difficulty'] = new_question.difficulty
+            response['category'] = new_question.category
 
-            return jsonify({
-                'success': True,
-                'question_id': new_question.id,
-                'question': new_question.question,
-                'answer': new_question.answer,
-                'difficulty': new_question.difficulty,
-                'category': new_question.category
-            })
+            return jsonify(response)
 
         except:
             abort(422)
@@ -171,12 +191,11 @@ def create_app(test_config=None):
             search_results = Question.query.filter(
                     Question.question.ilike(f'%{search_query}%')).all()
 
-            return jsonify({
-                'success': True,
-                'questions': [each_question.format() for each_question in search_results],
-                'totalQuestions': len(search_results)
-                }
-                )
+            response = get_success_response_template()
+            response['questions'] = [each_question.format() for each_question in search_results]
+            response['totalQuestions'] = len(search_results)
+
+            return jsonify(response)
         except:
             abort(422)
     """
@@ -197,12 +216,11 @@ def create_app(test_config=None):
 
             category = Category.query.get(category_id)
 
-            return jsonify({
-                'success': True,
-                'questions': [question.format() for question in questions],
-                'totalQuestions': len(questions),
-                'CurrentCategory': category.type
-            })
+            response = get_success_response_template()
+            response['questions'] = [question.format() for question in questions]
+            response['totalQuestions'] = len(questions)
+            response['CurrentCategory'] = category.type
+            return jsonify(response)
         except:
             abort(422)
     """
@@ -219,7 +237,6 @@ def create_app(test_config=None):
     @app.route('/quizzes', methods=['POST'])
     @cross_origin()
     def play_quiz():
-
         try:
 
             request_body = request.get_json()
@@ -231,16 +248,18 @@ def create_app(test_config=None):
             category = request_body.get('quiz_category')
             previous_questions = request_body.get('previous_questions')
 
-            new_questions_in_db = Question.query.filter_by(
+            not_asked_questions = Question.query.filter_by(
                     category=category['id']).filter(Question.id.notin_((previous_questions))).all()
 
-            new_question = new_questions_in_db[random.randrange(
-                0, len(new_questions_in_db))].format() if len(new_questions_in_db) > 0 else None
+            
+            max_index = len(not_asked_questions)-1
+            random_index = generate_random_index(0,max_index)
 
-            return jsonify({
-                'success': True,
-                'question': new_question
-            })
+            random_new_question = not_asked_questions[random_index]
+            
+            response = get_success_response_template()
+            response['question'] = random_new_question.format()
+            return jsonify(response)
         except:
             abort(422)
     """
