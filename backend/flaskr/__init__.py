@@ -40,9 +40,6 @@ def get_categories_by_type():
     '''
     return Category.query.all()
 
-def generate_random_index(min,max):
-    return random.randrange(min, max)
-
 
 def create_app(test_config=None):
     # create and configure the app
@@ -253,7 +250,7 @@ def create_app(test_config=None):
 
             
             max_index = len(not_asked_questions)-1
-            random_index = generate_random_index(0,max_index)
+            random_index = random.randrange(0, max_index)
 
             random_new_question = not_asked_questions[random_index]
             
